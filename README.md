@@ -134,6 +134,12 @@ ex:request a sotw:EvaluationRequest ;
     ] .
 ```
 
+BE: I think I mentioned this in the recent past: I would use https://w3id.org/dpv#ServiceProvider and https://w3id.org/dpv#ServiceConsumer as role types instead of defining new ones
+
+BE: `org:memberOf` has a domain and range, this makes the request semantically incorrect. Why not just using party collections?
+
+BE: `Role` seems like something we should have in https://w3id.org/force/sotw#, given its wide usability.
+
 State of the World
 ```ttl
 @prefix ex:      <http://example.com/> .
@@ -180,6 +186,7 @@ ex:roleConstraint a odrl:constraint ;
     odrl:rightOperand pilots:serviceUser .
 ```
 
+BE: Why is there nor an assignee? I would thin that the role constraint would be better suited as a party refinement.
 
 ## Demonstrator
 TODO:
@@ -199,7 +206,7 @@ A single page website that demonstrates all parts individually
 We'll be able to show multiple aspects
 - everything works
 - event is not complete/there is no event
-- one of the claims is not present (e.g. the serviceUser)
+- one of the claims is not present (e.g., the serviceUser)
 
 ## Appendix
 
@@ -262,6 +269,8 @@ pilots:PilotsEventShape
 
 ### ODRL Pilots profile
 
+BE: I added stuff directly to the turtle.
+
 ```ttl
 @prefix dcterms: <http://purl.org/dc/terms/>.
 @prefix odrl: <http://www.w3.org/ns/odrl/2/>.
@@ -279,18 +288,19 @@ pilots:PilotsEventShape
 
 <https://pilots-project.be/odrlProfile/> a owl:Ontology, profile:Profile ;
     profile:isProfileOf <http://www.w3.org/ns/odrl/2/core> ;
+    profile:hasResource pilotsProfile:pilotsProfile-html, pilotsProfile:pilotsProfile-ttl ;
     dcterms:title "ODRL Profile for Physical Internet Logistics and Optimized Transport Systems (PILOTS)."@en ;
     vann:preferredNamespacePrefix "pilotsProfile" ;
     vann:preferredNamespaceUri "https://pilots-project.be/odrlProfile/#"^^xsd:string ;
 	rdfs:label "ODRL PILOTS profile"@en ;
     owl:versionInfo "0.1"^^xsd:string ;
     dcterms:created "2026-09-09"^^xsd:date ;
-	dcterms:modified "2026-09-09"^^xsd:date ;
+	dcterms:modified "2026-09-09"^^xsd:date ; # not needed for the first version
 	dcterms:issued "2026-09-09"^^xsd:date ;
     owl:versionIRI <https://pilots-project.be/odrlProfile/0.1> ;
-	owl:priorVersion <https://pilots-project.be/odrlProfile/0.1> ;
-    dcterms:creator "Wout Slabbinck", "Julián Rojas" ;
-	dcterms:publisher "Wout Slabbinck" ;
+	owl:priorVersion <https://pilots-project.be/odrlProfile/0.1> ;  # not needed for the first version
+    dcterms:creator "Wout Slabbinck", "Julián Rojas" ; # would be nice to have IRIs instead or strings
+	dcterms:publisher "Wout Slabbinck" ; # same as above
     dcterms:abstract """
     An ODRL profile for policy-governed process interoperability in federated
     logistics environments. The profile introduces concepts that enable policy
@@ -306,27 +316,45 @@ pilots:PilotsEventShape
     """@en ;
 	rdfs:comment "This is the RDF ontology for the ODRL Profile for Physical Internet Logistics and Optimized Transport Systems (PILOTS)."@en ;
 	dcterms:source <http://www.w3.org/ns/odrl/2/> ;
-	dcterms:license <https://dalicc.net/licenselibrary/CC-BY-4.0> .
+	dcterms:license <https://dalicc.net/licenselibrary/CC-BY-4.0> . # it seems like DALICC is no longer being maintained, so I would use <http://purl.org/NET/rdflicense/cc-by4.0> 
+    # sw:term_status "testing"@en ; would be nice to keep track of the status of the profile
 
+pilotsProfile:pilotsProfile-html a profile:ResourceDescriptor ;
+    profile:hasRole role:specification ;
+    profile:hasArtifact <https://.../pilotsProfile.html> ;
+    dcterms:title "ODRL Profile for Physical Internet Logistics and Optimized Transport Systems (PILOTS) HTML specification"@en ;
+    dcterms:format <https://www.iana.org/assignments/media-types/text/html> ;
+    dcterms:conformsTo <https://www.w3.org/TR/html/> .
+
+pilotsProfile:pilotsProfile-ttl a profile:ResourceDescriptor ;
+    profile:hasRole role:vocabulary ;
+    profile:hasArtifact <https://.../pilotsProfile.ttl> ;
+    dcterms:title "ODRL Profile for Physical Internet Logistics and Optimized Transport Systems (PILOTS) Turtle vocabulary"@en ;
+    dcterms:format <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:conformsTo <https://www.w3.org/TR/turtle/> .
 
 <https://pilots-project.be/odrlProfile/#> a skos:Collection ;
     skos:prefLabel "ODRL PILOTS profile concepts"@en ;
     skos:member pilotsProfile:shape ;
     skos:member pilotsProfile:role .
-
+    # if any, used left operands from ODRL 2.2 need to be also added here.
 
 # ------------ Left Operand Concepts ------------------ #
 
 pilotsProfile:shape a odrl:LeftOperand, owl:NamedIndividual, skos:Concept ;
+    rdfs:isDefinedBy pilotsProfile: ;
     rdfs:label "Shape"@en ;
     rdfs:comment "Evaluates whether the event contained in the State of the World conforms to the SHACL shape identified by the right operand."@en ;
     skos:definition "A left operand whose value is derived by validating the sole event referenced from the State of the World against the SHACL shape specified as the right operand."@en ;
-    skos:note "The evaluator expects exactly one event to be present in the State of the World. Only odrl:eq SHOULD be used."@en .
+    skos:note "The evaluator expects exactly one event to be present in the State of the World. Only odrl:eq SHOULD be used."@en . # also specify allowed values of the right operand, i.e., SHACL shape?
 
 pilotsProfile:role a odrl:LeftOperand, owl:NamedIndividual, skos:Concept ;
+    rdfs:isDefinedBy pilotsProfile: ;
     rdfs:label "Role"@en ;
     rdfs:comment "Evaluates a role supplied as contextual information to the policy evaluation process."@en ;
     skos:definition "A left operand whose value is obtained from contextual attributes provided to the evaluation request and compared against the role identified by the right operand."@en ;
-    skos:note "Only odrl:eq SHOULD be used."@en .
+    skos:note "Only odrl:eq SHOULD be used."@en . # should it also list the only allowed right operands, given that it seems only 2 roles are valid in this context?
+
+# BE: for both operands, it would be nice to add `skos:example` with concrete examples.
 ```
 
