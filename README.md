@@ -5,6 +5,8 @@ Related to the [PILOTS ICON project](https://researchportal.vub.be/en/projects/i
 Builds on the publication in [IPIC 2026](https://ipic2026.pi.events/sites/default/files/downloads/IPIC2026_Proceedings.pdf): "Policy-based and Process-Aware Interoperability in the Physical Internet" (page 328 of the proceedings)
 by Philippe Michiels, Julián Rojas and Birger Schrevens
 
+In [PILOTS-service-policies](https://github.com/KNowledgeOnWebScale/PILOTS-service-policies), there exist some more example policies made by [Julián Rojas](https://github.com/julianrojas87).
+
 ## Open issues
 - we don't own the domain name: https://pilots-project.be/
 - What is scenario 2 exactly again
@@ -12,7 +14,10 @@ by Philippe Michiels, Julián Rojas and Birger Schrevens
 
 ## TODOs (clean up)
 
-- create and define role in FORCE: https://w3id.org/force/sotw#
+[FORCE ODRL profile](https://w3id.org/force/sotw/profile/)
+- create and define sotw-profile:role in FORCE as a Left Operand
+- create and define sotw-profile:shape in FORCE as a Left Operand
+
 ## Use Case: automated process-based access control
 
 ### High level descriptions
@@ -20,7 +25,7 @@ by Philippe Michiels, Julián Rojas and Birger Schrevens
 Using state of the art technologies and prototypes, show automated process-based usage control using dynamic roles with input validation.
 
 - Dynamic roles are achieved using [Verifiable Credentials](https://www.w3.org/TR/vc-data-model-2.0/) (VCs) and [Decentralized Identifiers](https://www.w3.org/TR/did-1.0/) (DIDs), both W3C Recommendations.
-- Usage control policies are written using the [Open Digital Rights Language](https://www.w3.org/TR/odrl-model) (ODRL) W3C Recommendation and evaluated using the state of the art [ODRL Evaluator](https://w3id.org/force/evaluator) accompagnied with vocabularies ([Evaluation Request](https://w3id.org/force/sotw), [State of the World](https://w3id.org/force/sotw) and [Compliance Report Model](https://w3id.org/force/compliance-report)) endorsed by the [ODRL CG](https://www.w3.org/community/odrl/).
+- Usage control policies are written using the [Open Digital Rights Language](https://www.w3.org/TR/odrl-model) (ODRL) W3C Recommendation and evaluated using the state of the art [ODRL Evaluator](https://w3id.org/force/evaluator) accompanied with vocabularies ([Evaluation Request](https://w3id.org/force/sotw), [State of the World](https://w3id.org/force/sotw) and [Compliance Report Model](https://w3id.org/force/compliance-report)) endorsed by the [ODRL CG](https://www.w3.org/community/odrl/).
 - Input Validation is achieved through the use of the [Shapes Constraint Language](https://www.w3.org/TR/shacl/) (SHACL), a W3C Recommendation
 
 DIDs and VCs could be handled through the [IdentityHub](https://github.com/eclipse-edc/IdentityHub) from the [Eclipse Dataspace Components (EDC)](https://github.com/eclipse-edc) organization.
@@ -38,7 +43,7 @@ Using the aforementioned technologies, there is no need for a central identity p
 - Bob DID: `did:jwk:bob`
 
 > [!NOTE]
-> The dids above are deliberatily simplified for demonstrative purpose. Real jwk dids normally start with `did:jwk:ey...`
+> The DIDs above are deliberately simplified for demonstrative purpose. Real jwk dids normally start with `did:jwk:ey...`
 
 Van Moer issues a credential to Alice:
 ```json
@@ -81,18 +86,26 @@ The same process can be used by Bob to prove to Alice that he works for CertiWei
 
 ### Scenario 2: Establishing the role within a process
 
+IDEA:
+There exists a central authority in this federated data spaces that states
+**-> Van Moer employees can be ServiceConsumer**s
+
+So Van Moer assigns the role **ServiceConsumer** to Alice for this purpose
+
+
+
 TODO: verify with Julian whether that makes sense
 
 Or is this achieved with the description of Scenario 1?
 
-NOTE: should scenario 2 ensure that we get the `pilots:serviceUser` role?
+NOTE: should scenario 2 ensure that we get the `dpv:ServiceConsumer` role?
 
-### Scenario 3: Evaluating access request with Input Validation
+### Scenario 3: Evaluating access request with input validation
 
 Building on the previous scenarios, we assume that Alice has already established her organisational affiliation and role using Verifiable Credentials and Decentralized Identifiers.
 
 In this scenario, Alice requests access to the certificate of the weight of a container.
-The access decision is amongst others based on her role (`pilots:serviceUser`) and on the state of the logistics process represented by a PILOTS event.
+The access decision is among other factors based on her role (`dpv:ServiceConsumer`) and on the state of the logistics process represented by a PILOTS event.
 
 The decision combines three inputs:
 
@@ -114,11 +127,10 @@ Evaluation Request
 ```ttl
 @prefix ex:      <http://example.com/> .
 @prefix odrl:    <http://www.w3.org/ns/odrl/2/> .
-@prefix dpv:     <http://www.w3.org/ns/dpv#>.
+@prefix dpv:     <https://w3id.org/dpv#>.
 @prefix sotw:    <https://w3id.org/force/sotw#> .
 @prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
 @prefix pilots:  <https://pilots-project.be/ns#> .
-@prefix org:     <http://www.w3.org/ns/org#> . # The Organization Ontology: W3C recommendation to publish cross-organizational information
 
 ex:request a sotw:EvaluationRequest ;
     sotw:evaluatedParty <did:jwk:alice> ;
@@ -126,7 +138,7 @@ ex:request a sotw:EvaluationRequest ;
     sotw:evaluatedTarget ex:containerWeight ;
     sotw:requestParameter [
         a sotw:RequestParameter ;
-        sotw:value "2025-11-24T11:44.22"^^xsd:dateTime ;
+        sotw:value "2025-11-24T11:44:22"^^xsd:dateTime ;
         sotw:describesFeature sotw:TemporalData ;
     ], [
         a sotw:RequestParameter ;
@@ -159,18 +171,18 @@ ex:event a pilots:ServiceUpdate, pilots:purchaseCertificate ;
     pilots:serviceInstanceId <urn:uuid:3977d047-322c-4fa9-8f23-7074aa154284> ; # TODO: what does this ID mean?
     pilots:previousState pilots:certificateCreated ;
     pilots:newState pilots:certificatePurchased ;
-    dct:issued "2025-11-24T11:44.22"^^xsd:dateTime . # NOTE: must this match the time of the request time?
+    dct:issued "2025-11-24T11:44:22"^^xsd:dateTime . # NOTE: must this match the time of the request time?
 ```
 
 ODRL Policy
 ```ttl
 @prefix ex:      <http://example.com/> .
 @prefix odrl:    <http://www.w3.org/ns/odrl/2/> .
-@prefix dpv:     <http://www.w3.org/ns/dpv#>.
+@prefix dpv:     <https://w3id.org/dpv#>.
 @prefix pilots:  <https://pilots-project.be/ns#> .
-@prefix pilotsProfile:  <https://pilots-project.be/odrlProfile/#> .
+@prefix pilotsProfile:  <https://pilots-project.be/odrlProfile/> .
 
-ex:pilotsPolicy a odrl:Set; # Can't be agreement cause we do not have an assigner and assignee
+ex:pilotsPolicy a odrl:Set; # This is an odrl:Set because the policy does not identify an assigner
     odrl:profile <https://pilots-project.be/odrlProfile/> ;
     odrl:permission ex:purchaseCertificatePermission .
 
@@ -178,7 +190,7 @@ ex:purchaseCertificatePermission a odrl:Permission;
     odrl:target ex:containerWeight ;
     odrl:assignee [
         a odrl:PartyCollection ;
-        refinement ex:roleConstraint .
+        odrl:refinement ex:roleConstraint .
     ] ;
     odrl:action odrl:read ;
     odrl:constraint ex:eventConstraint .
@@ -188,8 +200,8 @@ ex:eventConstraint a odrl:Constraint ;
     odrl:operator odrl:eq ;
     odrl:rightOperand pilots:PilotsEventShape .
 
-ex:roleConstraint a odrl:constraint ;
-    odrl:leftOperand pilotsProfile:Role ;
+ex:roleConstraint a odrl:Constraint ;
+    odrl:leftOperand pilotsProfile:role ;
     odrl:operator odrl:eq ;
     odrl:rightOperand dpv:ServiceConsumer ; # similar to pilots:serviceUser .
 ```
@@ -212,7 +224,7 @@ A single page website that demonstrates all parts individually
 We'll be able to show multiple aspects
 - everything works
 - event is not complete/there is no event
-- one of the claims is not present (e.g., the serviceUser)
+- one of the claims is not present (e.g., the ServiceConsumer)
 
 ## Appendix
 
@@ -286,7 +298,7 @@ pilots:PilotsEventShape
 @prefix dcterms: <http://purl.org/dc/terms/>.
 @prefix odrl: <http://www.w3.org/ns/odrl/2/>.
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
-@prefix pilots:  <https://pilots-project.be/> .
+@prefix pilots:  <https://pilots-project.be/ns#> .
 @prefix pilotsProfile:  <https://pilots-project.be/odrlProfile/> .
 @prefix profile: <http://www.w3.org/ns/dx/prof/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
@@ -298,12 +310,12 @@ pilots:PilotsEventShape
 
 # ------------ Ontology Metadata ------------------ #
 
-<https://pilots-project.be/odrlProfile/> a owl:Ontology, profile:Profile ;
+<https://pilots-project.be/odrlProfile> a owl:Ontology, profile:Profile ;
     profile:isProfileOf <http://www.w3.org/ns/odrl/2/core> ;
     profile:hasResource pilotsProfile:pilotsProfile-html, pilotsProfile:pilotsProfile-ttl ;
     dcterms:title "ODRL Profile for Physical Internet Logistics and Optimized Transport Systems (PILOTS)."@en ;
     vann:preferredNamespacePrefix "pilotsProfile" ;
-    vann:preferredNamespaceUri "https://pilots-project.be/odrlProfile/#"^^xsd:string ;
+    vann:preferredNamespaceUri "https://pilots-project.be/odrlProfile/"^^xsd:string ;
 	rdfs:label "ODRL PILOTS profile"@en ;
     owl:versionInfo "0.1"^^xsd:string ;
     dcterms:created "2026-09-09"^^xsd:date ;
@@ -343,7 +355,7 @@ pilotsProfile:pilotsProfile-ttl a profile:ResourceDescriptor ;
     dcterms:format <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:conformsTo <https://www.w3.org/TR/turtle/> .
 
-<https://pilots-project.be/odrlProfile/#> a skos:Collection ;
+pilotsProfile:Concepts a skos:Collection ;
     skos:prefLabel "ODRL PILOTS profile concepts"@en ;
     skos:member pilotsProfile:shape ;
     skos:member pilotsProfile:role .
@@ -371,7 +383,7 @@ pilotsProfile:role a odrl:LeftOperand, owl:NamedIndividual, skos:Concept ;
     rdfs:label "Role"@en ;
     rdfs:comment "Evaluates a role supplied as contextual information to the policy evaluation process."@en ;
     skos:definition "A left operand whose value is obtained from contextual attributes provided to the evaluation request and compared against the role identified by the right operand."@en ;
-    skos:note "Only odrl:eq SHOULD be used as odrl:Operator. Furthermore, the allowed odrl:RightOperand s are exlusively dpv:ServiceProvider and dpv:ServiceConsumer."@en ;
+    skos:note "Only odrl:eq SHOULD be used as odrl:Operator. Furthermore, the allowed odrl:RightOperand s are exclusively dpv:ServiceProvider and dpv:ServiceConsumer."@en ;
     skos:example '''
         <https://example.com/roleConstraint1> a odrl:Constraint ;
         odrl:leftOperand pilotsProfile:role ;
