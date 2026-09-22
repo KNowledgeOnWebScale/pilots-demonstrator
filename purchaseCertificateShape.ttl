@@ -1,0 +1,28 @@
+@prefix sh:      <http://www.w3.org/ns/shacl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix pilots:  <https://pilots-project.be/ns#> .
+
+pilots:PurchaseCertificateShape
+    a sh:NodeShape ;
+
+    sh:targetClass pilots:purchaseCertificate ;
+
+    sh:property [
+        sh:path pilots:previousState ;
+        sh:hasValue pilots:certificateCreated ;
+        sh:message "purchaseCertificate events must have previousState certificateCreated." ;
+    ] ;
+
+    sh:property [
+        sh:path pilots:newState ;
+        sh:hasValue pilots:certificatePurchased ;
+        sh:message "purchaseCertificate events must have newState certificatePurchased." ;
+    ] ;
+
+    sh:property [
+        sh:path pilots:paymentReference ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:message "purchaseCertificate events must contain exactly one paymentReference." ;
+    ] .

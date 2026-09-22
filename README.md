@@ -33,9 +33,9 @@ DIDs and VCs could be handled through the [IdentityHub](https://github.com/eclip
 > [!NOTE]
 > The scenarios in this document are situated within the certified container weighing process described in Section 7 of the IPIC 2026 paper. The process is executed within a federated logistics dataspace in which multiple organisations participate, including *Van Moer Logistics*, *CertiWeight*, and potentially other organisations such as *De Vlaamse Waterweg*.
 >
-> In line with dataspace principles, each participant retains control over its own identities, data, and services. Trust between participants is established through a shared governance framework. As part of this framework, a governance authority acts as a clearing house and maintains information about which participants are authorised to fulfil specific roles within a process.
+> In line with dataspace principles, each participant retains control over its own identities, data, and services. Trust between participants is established through a shared governance framework. As part of this framework, a governance authority acts as an observer (previously [clearing house](https://internationaldataspaces.org/from-clearing-house-to-observer-redefining-trust-in-data-transactions/) as defined by the IDSA) and maintains information about which participants are authorised to fulfil specific roles within a process.
 >
-> For the certified container weighing process, the clearing house recognises *Van Moer Logistics* as a participant that may consume certified weighing services and *CertiWeight* as a participant that may provide them. Based on this governance information, Van Moer may issue Verifiable Credentials asserting that one of its employees acts as a `dpv:ServiceConsumer`, while CertiWeight may issue Verifiable Credentials asserting that one of its employees acts as a `dpv:ServiceProvider`.
+> For the certified container weighing process, the observer recognises *Van Moer Logistics* as a participant that may consume certified weighing services and *CertiWeight* as a participant that may provide them. Based on this governance information, Van Moer may issue Verifiable Credentials asserting that one of its employees acts as a `dpv:ServiceConsumer`, while CertiWeight may issue Verifiable Credentials asserting that one of its employees acts as a `dpv:ServiceProvider`.
 >
 > The following scenarios demonstrate how employees prove their affiliations and process roles using Verifiable Credentials and Decentralized Identifiers, and how these claims are subsequently used during policy evaluation.
 
@@ -134,19 +134,22 @@ The access decision is among other factors based on her role (`dpv:ServiceConsum
 
 The decision combines three inputs:
 
-1. An **Evaluation Request** containing contextual information about Alice (the requesting party).
-2. A **State of the World (SotW)** containing the relevant process event.
+1. An **Evaluation Request** containing contextual information about Alice (the requesting party), following the model described in the [State of the World and Evaluation Request paper](https://ceur-ws.org/Vol-4093/paper5.pdf).
+2. A **State of the World (SotW)** containing the relevant process event, as introduced in the same [State of the World and Evaluation Request paper](https://ceur-ws.org/Vol-4093/paper5.pdf).
 3. An **ODRL Policy** describing the conditions under which access is permitted.
 
-In addition to role-based checks, the policy requires the process event contained in the State of the World to conform to a SHACL shape. This demonstrates how process-aware access control can combine dynamic roles, process context, and input validation in a single policy evaluation.
+In addition to role-based checks, the policy requires the process event contained in the State of the World to conform to a SHACL shape. 
+This validation approach builds on earlier work on semantic validation in transport and logistics systems presented at [Sem4Tra](https://ceur-ws.org/Vol-3510/paper_sem4tra_1.pdf), 
+and demonstrates how process-aware access control can combine dynamic roles, process context, and input validation in a single policy evaluation.
 
-The evaluation is performed by the ODRL Evaluator using the Evaluation Request, State of the World, and ODRL Policy as inputs.
+The evaluation is performed by the [ODRL Evaluator](https://dl.acm.org/doi/10.1007/978-3-031-94578-6_11) using the Evaluation Request, State of the World, and ODRL Policy as inputs.
 
 > [!NOTE]
 > This scenario is inspired by the certified container weighing process described in Section 7 of the IPIC 2026 paper. The event used in the State of the World corresponds to the `purchaseCertificate` transition.
 
 > [!NOTE]
 > The SHACL shape used to validate process events is included in the appendix. The ODRL policy uses the custom PILOTS ODRL profile, which is also defined in the appendix. 
+> Furthermore, a more specific SHACL shape is provided to validate `pilots:purchaseCertificate` events.
 
 Evaluation Request
 ```ttl
@@ -189,15 +192,34 @@ State of the World
 @prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
 
 ex:sotw a sotw:SotW ;
-    sotw:context ex:event .
+    sotw:context ex:event, ex:payment .
 
 ex:event a pilots:ServiceUpdate, pilots:purchaseCertificate ;
     pilots:serviceDefinitionId pilots:WeighingServiceDescription; 
-    pilots:serviceInstanceId <urn:uuid:3977d047-322c-4fa9-8f23-7074aa154284> ; # TODO: what does this ID mean?
+    pilots:serviceInstanceId <urn:uuid:3977d047-322c-4fa9-8f23-7074aa154284> ; 
     pilots:previousState pilots:certificateCreated ;
     pilots:newState pilots:certificatePurchased ;
+    pilots:paymentReference ex:payment ;
     dct:issued "2025-11-24T11:44:22"^^xsd:dateTime . # NOTE: must this match the time of the request time?
+
+ex:payment a pilots:Payment ;
+    pilots:payer <did:jwk:vanmoer> ;
+    pilots:payee <did:jwk:certiweight> ;
+    pilots:transactionId "paymentTransactionID" ;
+    pilots:paymentDate "2025-11-23T11:30:00"^^xsd:dateTime ; # NOTE: clearly before the request time
+    pilots:amount [
+        a pilots:MonetaryAmount ;
+        pilots:value "100.00"^^xsd:decimal ;
+        pilots:currency "EUR"
+    ] .
 ```
+
+> [!NOTE]
+> We could perhaps re-use the ontology of [good relations](https://www.heppnetz.de/ontologies/goodrelations/v1) to define the quantity and currency. Though unfortunately, we cannot use it for transactions.
+> The payment ontology proposed in the [force sotw](https://spec.knows.idlab.ugent.be/sotw/latest/#namespaces) does not resolve (https://reference.data.gov.uk/def/payment). Therefore, we make the payment pilots specific as well.
+
+> [!NOTE]
+> Another question, when checking whether it is payed. Is it for each time we want a certificate or only once? The semantics in ODRL are not well defined and therefore we cannot evaluate this properly. See [bonatti's paper](https://ceur-ws.org/Vol-3977/OPAL2025-4.pdf) (see remark 3: pay-per-view vs once and for all behaviour) Wout's ODRL journal on formal semantics where we detail we do not know this cardinality.
 
 ODRL Policy
 ```ttl
@@ -313,6 +335,44 @@ pilots:PilotsEventShape
         sh:message "A ServiceUpdate must contain exactly one issued timestamp of type xsd:dateTime." ;
     ] .
 ```
+
+### Purchase Certificate SHACL Resource
+The following SHACL shape ensures that `pilots:PurchaseCertificateShape` events contain as previous state `pilots:certificateCreated`, as next state `pilots:certificatePurchased` and have a `pilots:paymentReference` .
+
+> [!WARNING]
+> The snippet below is copied from the [purchase certificate SHACL shape](./purchaseCertificateShape.ttl), so potentially outdated.
+
+```ttl
+@prefix sh:      <http://www.w3.org/ns/shacl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix pilots:  <https://pilots-project.be/ns#> .
+
+pilots:PurchaseCertificateShape
+    a sh:NodeShape ;
+
+    sh:targetClass pilots:purchaseCertificate ;
+
+    sh:property [
+        sh:path pilots:previousState ;
+        sh:hasValue pilots:certificateCreated ;
+        sh:message "purchaseCertificate events must have previousState certificateCreated." ;
+    ] ;
+
+    sh:property [
+        sh:path pilots:newState ;
+        sh:hasValue pilots:certificatePurchased ;
+        sh:message "purchaseCertificate events must have newState certificatePurchased." ;
+    ] ;
+
+    sh:property [
+        sh:path pilots:paymentReference ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:message "purchaseCertificate events must contain exactly one paymentReference." ;
+    ] .
+```
+
 
 ### ODRL Pilots profile
 
