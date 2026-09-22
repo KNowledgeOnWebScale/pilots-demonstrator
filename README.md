@@ -30,6 +30,15 @@ Using state of the art technologies and prototypes, show automated process-based
 
 DIDs and VCs could be handled through the [IdentityHub](https://github.com/eclipse-edc/IdentityHub) from the [Eclipse Dataspace Components (EDC)](https://github.com/eclipse-edc) organization.
 
+> [!NOTE]
+> The scenarios in this document are situated within the certified container weighing process described in Section 7 of the IPIC 2026 paper. The process is executed within a federated logistics dataspace in which multiple organisations participate, including *Van Moer Logistics*, *CertiWeight*, and potentially other organisations such as *De Vlaamse Waterweg*.
+>
+> In line with dataspace principles, each participant retains control over its own identities, data, and services. Trust between participants is established through a shared governance framework. As part of this framework, a governance authority acts as a clearing house and maintains information about which participants are authorised to fulfil specific roles within a process.
+>
+> For the certified container weighing process, the clearing house recognises *Van Moer Logistics* as a participant that may consume certified weighing services and *CertiWeight* as a participant that may provide them. Based on this governance information, Van Moer may issue Verifiable Credentials asserting that one of its employees acts as a `dpv:ServiceConsumer`, while CertiWeight may issue Verifiable Credentials asserting that one of its employees acts as a `dpv:ServiceProvider`.
+>
+> The following scenarios demonstrate how employees prove their affiliations and process roles using Verifiable Credentials and Decentralized Identifiers, and how these claims are subsequently used during policy evaluation.
+
 ### Scenario 1: Establishing organisational identity
 
 In PILOTS, independent participants collaborate in a federated ecosystem.
@@ -86,19 +95,35 @@ The same process can be used by Bob to prove to Alice that he works for CertiWei
 
 ### Scenario 2: Establishing the role within a process
 
-IDEA:
-There exists a central authority in this federated data spaces that states
-**-> Van Moer employees can be ServiceConsumer**s
+Building on the previous scenario, Alice has already demonstrated that she is affiliated with Van Moer Logistics.
+In this scenario, we consider a governance authority that defines which organisational participants may act in certain process roles. 
+The authority recognises Van Moer Logistics as a valid service consumer organisation and allows it to assign the role `dpv:ServiceConsumer` to its employees.
 
-So Van Moer assigns the role **ServiceConsumer** to Alice for this purpose
+To enable Alice to act on behalf of Van Moer, Van Moer issues a Verifiable Credential stating that Alice has the role `dpv:ServiceConsumer`.
+```json
+{
+  "issuer": "did:jwk:vanmoer",
+  "credentialSubject": {
+    "id": "did:jwk:alice",
+    "role": "dpv:ServiceConsumer"
+  }
+}
+```
 
+#### Proving process role
+Suppose Alice wants to demonstrate that she is authorised to act as a service consumer.
 
+1. Alice presents the credential containing her role.
+2. Alice creates a Verifiable Presentation (VP) containing the credential.
+3. Alice signs the VP using the private key corresponding to `did:jwk:alice`.
+4. The verifier checks:
+   - the signature on the VP using Alice's DID;
+   - the signature on the credential using Van Moer's DID;
+   - that the credential subject (`did:jwk:alice`) matches the DID that signed the VP.
+   - that the governance framework recognises Van Moer Logistics as an organisation authorised to assign the `dpv:ServiceConsumer` role.
+If all checks succeed, the verifier can conclude:
 
-TODO: verify with Julian whether that makes sense
-
-Or is this achieved with the description of Scenario 1?
-
-NOTE: should scenario 2 ensure that we get the `dpv:ServiceConsumer` role?
+> The presenter controls `did:jwk:alice`, and Van Moer Logistics asserts that this DID is authorised to act as a `dpv:ServiceConsumer`, and the governance framework authorises Van Moer Logistics to assign that role.
 
 ### Scenario 3: Evaluating access request with input validation
 
