@@ -1,0 +1,101 @@
+@prefix dcterms: <http://purl.org/dc/terms/>.
+@prefix odrl: <http://www.w3.org/ns/odrl/2/>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix pilots:  <https://pilots-project.be/> .
+@prefix pilotsProfile:  <https://pilots-project.be/odrlProfile/> .
+@prefix profile: <http://www.w3.org/ns/dx/prof/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix skos: <http://www.w3.org/2004/02/skos/core#>.
+@prefix sw: <http://www.w3.org/2003/06/sw-vocab-status/ns#>.
+@prefix vann: <http://purl.org/vocab/vann/>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+
+# ------------ Ontology Metadata ------------------ #
+
+<https://pilots-project.be/odrlProfile/> a owl:Ontology, profile:Profile ;
+    profile:isProfileOf <http://www.w3.org/ns/odrl/2/core> ;
+    profile:hasResource pilotsProfile:pilotsProfile-html, pilotsProfile:pilotsProfile-ttl ;
+    dcterms:title "ODRL Profile for Physical Internet Logistics and Optimized Transport Systems (PILOTS)."@en ;
+    vann:preferredNamespacePrefix "pilotsProfile" ;
+    vann:preferredNamespaceUri "https://pilots-project.be/odrlProfile/#"^^xsd:string ;
+	rdfs:label "ODRL PILOTS profile"@en ;
+    owl:versionInfo "0.1"^^xsd:string ;
+    dcterms:created "2026-09-09"^^xsd:date ;
+	dcterms:issued "2026-09-09"^^xsd:date ;
+    owl:versionIRI <https://pilots-project.be/odrlProfile/0.1> ;
+    dcterms:creator <https://pod.woutslabbinck.com/profile/card#me>, <https://julianrojas.org/#me> ;
+	dcterms:publisher <https://pod.woutslabbinck.com/profile/card#me> ; 
+    dcterms:abstract """
+    An ODRL profile for policy-governed process interoperability in federated
+    logistics environments. The profile introduces concepts that enable policy
+    evaluation over process events and contextual attributes exchanged between
+    participants during process execution.
+    """@en ;
+    dcterms:description """
+    This profile extends ODRL with concepts for evaluating process-oriented
+    information used in the PILOTS interoperability model. The concepts support
+    reasoning over process events represented in a State of the World and over
+    contextual attributes supplied during policy evaluation, enabling validation
+    of process execution and participant authorisation.
+    """@en ;
+	rdfs:comment "This is the RDF ontology for the ODRL Profile for Physical Internet Logistics and Optimized Transport Systems (PILOTS)."@en ;
+	dcterms:source <http://www.w3.org/ns/odrl/2/> ;
+	dcterms:license <http://purl.org/NET/rdflicense/cc-by4.0> ; 
+    sw:term_status "testing"@en.
+
+pilotsProfile:pilotsProfile-html a profile:ResourceDescriptor ;
+    profile:hasRole pilotsProfile:specification ;
+    profile:hasArtifact <https://pilots-project.be/pilotsProfile.html> ;
+    dcterms:title "ODRL Profile for Physical Internet Logistics and Optimized Transport Systems (PILOTS) HTML specification"@en ;
+    dcterms:format <https://www.iana.org/assignments/media-types/text/html> ;
+    dcterms:conformsTo <https://www.w3.org/TR/html/> .
+
+pilotsProfile:pilotsProfile-ttl a profile:ResourceDescriptor ;
+    profile:hasRole pilotsProfile:vocabulary ;
+    profile:hasArtifact <https://pilots-project.be/pilotsProfile.ttl> ;
+    dcterms:title "ODRL Profile for Physical Internet Logistics and Optimized Transport Systems (PILOTS) Turtle vocabulary"@en ;
+    dcterms:format <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:conformsTo <https://www.w3.org/TR/turtle/> .
+
+<https://pilots-project.be/odrlProfile/#> a skos:Collection ;
+    skos:prefLabel "ODRL PILOTS profile concepts"@en ;
+    skos:member pilotsProfile:shape ;
+    skos:member pilotsProfile:role .
+    # if any, used left operands from ODRL 2.2 need to be also added here.
+
+# ------------ Left Operand Concepts ------------------ #
+
+pilotsProfile:shape a odrl:LeftOperand, owl:NamedIndividual, skos:Concept ;
+    rdfs:isDefinedBy pilotsProfile: ;
+    rdfs:label "Shape"@en ;
+    rdfs:comment "Evaluates whether the event contained in the State of the World conforms to the SHACL shape identified by the right operand."@en ;
+    skos:definition "A left operand whose value is derived by validating the sole event referenced from the State of the World against the SHACL shape specified as the right operand."@en ;
+    skos:note "The evaluator expects exactly one event to be present in the State of the World. Only odrl:eq SHOULD be used as odrl:Operator. As odrl:RightOperand, the allowed value is an IRI which corresponds to a SHACL shape (of class sh:NodeShape)."@en ;
+    skos:example '''
+        <https://example.com/shapeConstraint1> a odrl:Constraint ;
+        odrl:leftOperand pilotsProfile:shape ;
+        odrl:operator odrl:eq ;
+        odrl:rightOperand <https://example.com/shape> .
+
+        # Then somewhere there must be the following shape must exist
+        <https://example.com/shape> a <http://www.w3.org/ns/shacl#NodeShape> .
+    '''.
+pilotsProfile:role a odrl:LeftOperand, owl:NamedIndividual, skos:Concept ;
+    rdfs:isDefinedBy pilotsProfile: ;
+    rdfs:label "Role"@en ;
+    rdfs:comment "Evaluates a role supplied as contextual information to the policy evaluation process."@en ;
+    skos:definition "A left operand whose value is obtained from contextual attributes provided to the evaluation request and compared against the role identified by the right operand."@en ;
+    skos:note "Only odrl:eq SHOULD be used as odrl:Operator. Furthermore, the allowed odrl:RightOperand s are exlusively dpv:ServiceProvider and dpv:ServiceConsumer."@en ;
+    skos:example '''
+        <https://example.com/roleConstraint1> a odrl:Constraint ;
+        odrl:leftOperand pilotsProfile:role ;
+        odrl:operator odrl:eq ;
+        odrl:rightOperand dpv:ServiceConsumer .
+    ''',
+    '''
+        <https://example.com/roleConstraint2> a odrl:Constraint ;
+        odrl:leftOperand pilotsProfile:role ;
+        odrl:operator odrl:eq ;
+        odrl:rightOperand dpv:ServiceProvider .
+    ''' .

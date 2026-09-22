@@ -8,9 +8,11 @@ by Philippe Michiels, Julián Rojas and Birger Schrevens
 ## Open issues
 - we don't own the domain name: https://pilots-project.be/
 - What is scenario 2 exactly again
-- Does this make sense? I think this is important before I make the webpage
 - The SHACL shape only checks the general pilots service update shape. Not whether the states actually are correct (which we could do if that is required)
 
+## TODOs (clean up)
+
+- create and define role in FORCE: https://w3id.org/force/sotw#
 ## Use Case: automated process-based access control
 
 ### High level descriptions
@@ -20,6 +22,8 @@ Using state of the art technologies and prototypes, show automated process-based
 - Dynamic roles are achieved using [Verifiable Credentials](https://www.w3.org/TR/vc-data-model-2.0/) (VCs) and [Decentralized Identifiers](https://www.w3.org/TR/did-1.0/) (DIDs), both W3C Recommendations.
 - Usage control policies are written using the [Open Digital Rights Language](https://www.w3.org/TR/odrl-model) (ODRL) W3C Recommendation and evaluated using the state of the art [ODRL Evaluator](https://w3id.org/force/evaluator) accompagnied with vocabularies ([Evaluation Request](https://w3id.org/force/sotw), [State of the World](https://w3id.org/force/sotw) and [Compliance Report Model](https://w3id.org/force/compliance-report)) endorsed by the [ODRL CG](https://www.w3.org/community/odrl/).
 - Input Validation is achieved through the use of the [Shapes Constraint Language](https://www.w3.org/TR/shacl/) (SHACL), a W3C Recommendation
+
+DIDs and VCs could be handled through the [IdentityHub](https://github.com/eclipse-edc/IdentityHub) from the [Eclipse Dataspace Components (EDC)](https://github.com/eclipse-edc) organization.
 
 ### Scenario 1: Establishing organisational identity
 
@@ -110,6 +114,7 @@ Evaluation Request
 ```ttl
 @prefix ex:      <http://example.com/> .
 @prefix odrl:    <http://www.w3.org/ns/odrl/2/> .
+@prefix dpv:     <http://www.w3.org/ns/dpv#>.
 @prefix sotw:    <https://w3id.org/force/sotw#> .
 @prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
 @prefix pilots:  <https://pilots-project.be/ns#> .
@@ -125,20 +130,18 @@ ex:request a sotw:EvaluationRequest ;
         sotw:describesFeature sotw:TemporalData ;
     ], [
         a sotw:RequestParameter ;
-        sotw:value pilots:serviceUser ;
-        sotw:describesFeature pilots:Role .
-    ], [
-        a sotw:RequestParameter ;
-        sotw:value <did:jwk:vanmoer> ;
-        sotw:describesFeature org:memberOf .
+        sotw:value dpv:ServiceConsumer ; # similar to pilots:serviceUser
+        sotw:describesFeature pilots:actorRole . # defined in the IPIC paper
     ] .
+
+<did:jwk:vanmoer> a odrl:PartyCollection .
+<did:jwk:alice> odrl:partOf <did:jwk:vanmoer> .
 ```
 
-BE: I think I mentioned this in the recent past: I would use https://w3id.org/dpv#ServiceProvider and https://w3id.org/dpv#ServiceConsumer as role types instead of defining new ones
+> [!NOTE]
+> The roles `dpv:ServiceProvider` and `dpv:ServiceConsumer` are reused instead of introducing `pilots:serviceProvider` and `pilots:serviceUser`, as these concepts are already defined in [DPV](http://www.w3.org/ns/dpv). </br>
+> This differs a bit from the IPIC 2026 paper by Philippe Michiels, Julián Rojas and Birger Schrevens where they did introduce `pilots:serviceProvider` and `pilots:serviceUser`.
 
-BE: `org:memberOf` has a domain and range, this makes the request semantically incorrect. Why not just using party collections?
-
-BE: `Role` seems like something we should have in https://w3id.org/force/sotw#, given its wide usability.
 
 State of the World
 ```ttl
@@ -163,8 +166,9 @@ ODRL Policy
 ```ttl
 @prefix ex:      <http://example.com/> .
 @prefix odrl:    <http://www.w3.org/ns/odrl/2/> .
+@prefix dpv:     <http://www.w3.org/ns/dpv#>.
 @prefix pilots:  <https://pilots-project.be/ns#> .
-@prefix pilotsProfile:  <https://pilots-project.be/odrlProfile/> .
+@prefix pilotsProfile:  <https://pilots-project.be/odrlProfile/#> .
 
 ex:pilotsPolicy a odrl:Set; # Can't be agreement cause we do not have an assigner and assignee
     odrl:profile <https://pilots-project.be/odrlProfile/> ;
@@ -172,8 +176,12 @@ ex:pilotsPolicy a odrl:Set; # Can't be agreement cause we do not have an assigne
 
 ex:purchaseCertificatePermission a odrl:Permission;
     odrl:target ex:containerWeight ;
+    odrl:assignee [
+        a odrl:PartyCollection ;
+        refinement ex:roleConstraint .
+    ] ;
     odrl:action odrl:read ;
-    odrl:constraint ex:eventConstraint, ex:roleConstraint .
+    odrl:constraint ex:eventConstraint .
 
 ex:eventConstraint a odrl:Constraint ;
     odrl:leftOperand pilotsProfile:shape ;
@@ -181,12 +189,10 @@ ex:eventConstraint a odrl:Constraint ;
     odrl:rightOperand pilots:PilotsEventShape .
 
 ex:roleConstraint a odrl:constraint ;
-    odrl:leftOperand pilotsProfile:role ;
+    odrl:leftOperand pilotsProfile:Role ;
     odrl:operator odrl:eq ;
-    odrl:rightOperand pilots:serviceUser .
+    odrl:rightOperand dpv:ServiceConsumer ; # similar to pilots:serviceUser .
 ```
-
-BE: Why is there nor an assignee? I would thin that the role constraint would be better suited as a party refinement.
 
 ## Demonstrator
 TODO:
@@ -211,6 +217,10 @@ We'll be able to show multiple aspects
 ## Appendix
 
 ### Service Update SHACL Resource
+
+> [!WARNING]
+> The snippet below is copied from the [service SHACL shape](./serviceShape.ttl), so potentially outdated.
+
 
 The following SHACL shape ensures that every `pilots:ServiceUpdate` contains exactly one service definition, service instance, previous state, new state, and issuance timestamp. 
 
@@ -269,7 +279,8 @@ pilots:PilotsEventShape
 
 ### ODRL Pilots profile
 
-BE: I added stuff directly to the turtle.
+> [!WARNING]
+> The snippet below is copied from the [pilots profile](./pilotsProfile.ttl), so potentially outdated.
 
 ```ttl
 @prefix dcterms: <http://purl.org/dc/terms/>.
@@ -280,6 +291,7 @@ BE: I added stuff directly to the turtle.
 @prefix profile: <http://www.w3.org/ns/dx/prof/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix skos: <http://www.w3.org/2004/02/skos/core#>.
+@prefix sw: <http://www.w3.org/2003/06/sw-vocab-status/ns#>.
 @prefix vann: <http://purl.org/vocab/vann/>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 
@@ -295,12 +307,10 @@ BE: I added stuff directly to the turtle.
 	rdfs:label "ODRL PILOTS profile"@en ;
     owl:versionInfo "0.1"^^xsd:string ;
     dcterms:created "2026-09-09"^^xsd:date ;
-	dcterms:modified "2026-09-09"^^xsd:date ; # not needed for the first version
 	dcterms:issued "2026-09-09"^^xsd:date ;
     owl:versionIRI <https://pilots-project.be/odrlProfile/0.1> ;
-	owl:priorVersion <https://pilots-project.be/odrlProfile/0.1> ;  # not needed for the first version
-    dcterms:creator "Wout Slabbinck", "Julián Rojas" ; # would be nice to have IRIs instead or strings
-	dcterms:publisher "Wout Slabbinck" ; # same as above
+    dcterms:creator <https://pod.woutslabbinck.com/profile/card#me>, <https://julianrojas.org/#me> ;
+	dcterms:publisher <https://pod.woutslabbinck.com/profile/card#me> ; 
     dcterms:abstract """
     An ODRL profile for policy-governed process interoperability in federated
     logistics environments. The profile introduces concepts that enable policy
@@ -316,19 +326,19 @@ BE: I added stuff directly to the turtle.
     """@en ;
 	rdfs:comment "This is the RDF ontology for the ODRL Profile for Physical Internet Logistics and Optimized Transport Systems (PILOTS)."@en ;
 	dcterms:source <http://www.w3.org/ns/odrl/2/> ;
-	dcterms:license <https://dalicc.net/licenselibrary/CC-BY-4.0> . # it seems like DALICC is no longer being maintained, so I would use <http://purl.org/NET/rdflicense/cc-by4.0> 
-    # sw:term_status "testing"@en ; would be nice to keep track of the status of the profile
+	dcterms:license <http://purl.org/NET/rdflicense/cc-by4.0> ; 
+    sw:term_status "testing"@en.
 
 pilotsProfile:pilotsProfile-html a profile:ResourceDescriptor ;
-    profile:hasRole role:specification ;
-    profile:hasArtifact <https://.../pilotsProfile.html> ;
+    profile:hasRole pilotsProfile:specification ;
+    profile:hasArtifact <https://pilots-project.be/pilotsProfile.html> ;
     dcterms:title "ODRL Profile for Physical Internet Logistics and Optimized Transport Systems (PILOTS) HTML specification"@en ;
     dcterms:format <https://www.iana.org/assignments/media-types/text/html> ;
     dcterms:conformsTo <https://www.w3.org/TR/html/> .
 
 pilotsProfile:pilotsProfile-ttl a profile:ResourceDescriptor ;
-    profile:hasRole role:vocabulary ;
-    profile:hasArtifact <https://.../pilotsProfile.ttl> ;
+    profile:hasRole pilotsProfile:vocabulary ;
+    profile:hasArtifact <https://pilots-project.be/pilotsProfile.ttl> ;
     dcterms:title "ODRL Profile for Physical Internet Logistics and Optimized Transport Systems (PILOTS) Turtle vocabulary"@en ;
     dcterms:format <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:conformsTo <https://www.w3.org/TR/turtle/> .
@@ -346,15 +356,32 @@ pilotsProfile:shape a odrl:LeftOperand, owl:NamedIndividual, skos:Concept ;
     rdfs:label "Shape"@en ;
     rdfs:comment "Evaluates whether the event contained in the State of the World conforms to the SHACL shape identified by the right operand."@en ;
     skos:definition "A left operand whose value is derived by validating the sole event referenced from the State of the World against the SHACL shape specified as the right operand."@en ;
-    skos:note "The evaluator expects exactly one event to be present in the State of the World. Only odrl:eq SHOULD be used."@en . # also specify allowed values of the right operand, i.e., SHACL shape?
+    skos:note "The evaluator expects exactly one event to be present in the State of the World. Only odrl:eq SHOULD be used as odrl:Operator. As odrl:RightOperand, the allowed value is an IRI which corresponds to a SHACL shape (of class sh:NodeShape)."@en ;
+    skos:example '''
+        <https://example.com/shapeConstraint1> a odrl:Constraint ;
+        odrl:leftOperand pilotsProfile:shape ;
+        odrl:operator odrl:eq ;
+        odrl:rightOperand <https://example.com/shape> .
 
+        # Then somewhere there must be the following shape must exist
+        <https://example.com/shape> a <http://www.w3.org/ns/shacl#NodeShape> .
+    '''.
 pilotsProfile:role a odrl:LeftOperand, owl:NamedIndividual, skos:Concept ;
     rdfs:isDefinedBy pilotsProfile: ;
     rdfs:label "Role"@en ;
     rdfs:comment "Evaluates a role supplied as contextual information to the policy evaluation process."@en ;
     skos:definition "A left operand whose value is obtained from contextual attributes provided to the evaluation request and compared against the role identified by the right operand."@en ;
-    skos:note "Only odrl:eq SHOULD be used."@en . # should it also list the only allowed right operands, given that it seems only 2 roles are valid in this context?
-
-# BE: for both operands, it would be nice to add `skos:example` with concrete examples.
+    skos:note "Only odrl:eq SHOULD be used as odrl:Operator. Furthermore, the allowed odrl:RightOperand s are exlusively dpv:ServiceProvider and dpv:ServiceConsumer."@en ;
+    skos:example '''
+        <https://example.com/roleConstraint1> a odrl:Constraint ;
+        odrl:leftOperand pilotsProfile:role ;
+        odrl:operator odrl:eq ;
+        odrl:rightOperand dpv:ServiceConsumer .
+    ''',
+    '''
+        <https://example.com/roleConstraint2> a odrl:Constraint ;
+        odrl:leftOperand pilotsProfile:role ;
+        odrl:operator odrl:eq ;
+        odrl:rightOperand dpv:ServiceProvider .
+    ''' .
 ```
-

@@ -1,0 +1,49 @@
+@prefix sh:      <http://www.w3.org/ns/shacl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix dct:     <http://purl.org/dc/terms/> .
+@prefix pilots:  <https://pilots-project.be/ns#> .
+
+pilots:PilotsEventShape
+    a sh:NodeShape ;
+    sh:targetClass pilots:ServiceUpdate ;
+
+    sh:property [
+        sh:path pilots:serviceDefinitionId ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:message "A ServiceUpdate must contain exactly one serviceDefinitionId IRI." ;
+    ] ;
+
+    sh:property [
+        sh:path pilots:serviceInstanceId ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:message "A ServiceUpdate must contain exactly one serviceInstanceId IRI." ;
+    ] ;
+
+    sh:property [
+        sh:path pilots:previousState ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:message "A ServiceUpdate must contain exactly one previousState IRI." ;
+    ] ;
+
+    sh:property [
+        sh:path pilots:newState ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:message "A ServiceUpdate must contain exactly one newState IRI." ;
+    ] ;
+
+    sh:property [
+        sh:path dct:issued ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:dateTime ;
+        sh:message "A ServiceUpdate must contain exactly one issued timestamp of type xsd:dateTime." ;
+    ] .
