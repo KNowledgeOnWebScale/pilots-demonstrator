@@ -7,6 +7,8 @@ by Philippe Michiels, Julián Rojas and Birger Schrevens
 
 In [PILOTS-service-policies](https://github.com/KNowledgeOnWebScale/PILOTS-service-policies), there exist some more example policies made by [Julián Rojas](https://github.com/julianrojas87).
 
+[Tom Bergmans](https://github.com/TomBergmans-Imec) created a [dashboard UI (stubbed)](https://github.com/Pilots-community/pilots-client-app) for the weighing use case in the [pilots-community](https://github.com/Pilots-community) GitHub organization.
+
 ## Open issues
 - we don't own the domain name: https://pilots-project.be/
 - What is scenario 2 exactly again
