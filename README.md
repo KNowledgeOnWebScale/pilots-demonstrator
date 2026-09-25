@@ -41,6 +41,110 @@ DIDs and VCs could be handled through the [IdentityHub](https://github.com/eclip
 >
 > The following scenarios demonstrate how employees prove their affiliations and process roles using Verifiable Credentials and Decentralized Identifiers, and how these claims are subsequently used during policy evaluation.
 
+
+The architecture consists of five connector nodes: a Governance Authority connector, a Van Moer Logistics connector, a CertiWeight connector, and personal connectors for Alice and Bob. All of them are identifiable through DIDs.<br>
+The CertiWeight connector contains components to verify credentials and calculate policy decision based of those credentials. 
+```mermaid
+flowchart TB
+
+    GOV["Governance Authority Connector"]
+
+    subgraph VM["Van Moer Logistics Connector"]
+        VM_DID["Organization DID"]
+        VM_ISSUER["VC Issuer"]
+    end
+
+    subgraph CW["CertiWeight Connector"]
+        CW_DID["Organization DID"]
+        CW_ISSUER["VC Issuer"]
+
+        ORCH["Orchestrator"]
+
+        CV["Credential Verifier"]
+
+        PDP["ODRL Evaluator (PDP)"]
+
+        POLICY["Policy Store"]
+
+        CERT["Certificate Service"]
+    end
+
+    subgraph ALICE["Alice Connector"]
+        ALICE_DID["Personal DID"]
+        ALICE_WALLET["Credential Wallet"]
+    end
+
+    subgraph BOB["Bob Connector"]
+        BOB_DID["Personal DID"]
+        BOB_WALLET["Credential Wallet"]
+    end
+
+    GOV -->|
+    Governance framework
+
+    Authorizes role delegation
+    | VM
+
+    GOV -->|
+    Governance framework
+
+    Authorizes role delegation
+    | CW
+
+    VM -->|
+    Issues employment VC
+
+    Issues ServiceConsumer VC
+    | ALICE_WALLET
+
+    CW -->|
+    Issues employment VC
+
+    Issues ServiceProvider VC
+    | BOB_WALLET
+
+    ALICE -->|
+    Request weighing certificate
+
+    Present credentials
+    | ORCH
+
+    ORCH -->|
+    Verify credentials
+    | CV
+
+    CV -->|
+    Verified affiliation
+
+    Verified role
+    | ORCH
+
+    ORCH -->|
+    Create Evaluation Request
+
+    Create State of the World
+    | PDP
+
+    POLICY -->|
+    ODRL policies
+
+    SHACL shapes
+    | PDP
+
+    PDP -->|
+    Permit / Deny
+    | ORCH
+
+    ORCH -->|
+    Authorized request
+    | CERT
+
+    CERT -->|
+    Weighing certificate
+    | ALICE
+```
+
+
 Trust diagram regarding issuance of roles and employee status (scenario 1 and 2):
 ```mermaid
 flowchart TB
@@ -94,27 +198,35 @@ flowchart TB
     | BOB
 ```
 
-Sequence diagram for the third scenario
+Sequence diagram for the third scenario.
+Note that normally an orchestrater component should be added in the internals.
 ```mermaid
 sequenceDiagram
 
     participant Alice
+    participant Orch as Orchestrator
     participant CV as Credential Verifier
     participant PDP as ODRL Evaluator (PDP)
     participant Policy as Policy Store
     participant Service as Certificate Service
 
-    Alice->>CV: GET weighing certificate
-    Alice->>CV: Present affiliation VC
-    Alice->>CV: Present ServiceConsumer VC
+    Alice->>Orch: GET weighing certificate
+    Note over Alice,Orch: During GET Present affiliation VC<br> and ServiceConsumer VC
+
+    Orch->>CV: Verify presented credentials
 
     CV->>CV: Verify VP signature
     CV->>CV: Verify VC signatures
     CV->>CV: Verify Van Moer may assign ServiceConsumer
 
-    CV->>PDP: Evaluation Request
-    CV->>PDP: State of the World
-    Note over CV,PDP: SotW contains purchaseCertificate event and payment information
+    CV-->>Orch: Verified affiliation and role
+
+    Orch->>Orch: Create Evaluation Request
+    Orch->>Orch: Create State of the World
+
+    Note over Orch: SotW contains purchaseCertificate event and payment information
+
+    Orch->>PDP: Evaluate Policy<br/>(Evaluation Request + State of the World)
 
     Policy->>PDP: ODRL Policy
     Policy->>PDP: SHACL Shapes
@@ -123,11 +235,12 @@ sequenceDiagram
     PDP->>PDP: Evaluate role constraint
     PDP->>PDP: Evaluate policy
 
-    PDP-->>CV: Permit
+    PDP-->>Orch: Permit
 
-    CV->>Service: Authorized request
+    Orch->>Service: Authorized certificate request
 
     Service->>Service: Transition state
+
     Note over Service: certificateCreated → certificatePurchased
 
     Service-->>Alice: Weighing certificate
