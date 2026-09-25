@@ -41,6 +41,98 @@ DIDs and VCs could be handled through the [IdentityHub](https://github.com/eclip
 >
 > The following scenarios demonstrate how employees prove their affiliations and process roles using Verifiable Credentials and Decentralized Identifiers, and how these claims are subsequently used during policy evaluation.
 
+Trust diagram regarding issuance of roles and employee status (scenario 1 and 2):
+```mermaid
+flowchart TB
+
+    GOV["Governance Authority"]
+
+    VM["Van Moer Logistics"]
+    CW["CertiWeight"]
+
+    ALICE["Alice"]
+    BOB["Bob"]
+
+    GOV -->|
+    Authorizes Van Moer to assign
+    dpv:ServiceConsumer roles
+    | VM
+
+    GOV -->|
+    Authorizes CertiWeight to assign
+    dpv:ServiceProvider roles
+    | CW
+
+    VM -->|
+    Issues employment VC
+
+    Claim:
+    Alice works for Van Moer
+    | ALICE
+
+    VM -->|
+    Issues role VC
+
+    Claim:
+    Alice acts as
+    dpv:ServiceConsumer
+    | ALICE
+
+    CW -->|
+    Issues employment VC
+
+    Claim:
+    Bob works for CertiWeight
+    | BOB
+
+    CW -->|
+    Issues role VC
+
+    Claim:
+    Bob acts as
+    dpv:ServiceProvider
+    | BOB
+```
+
+Sequence diagram for the third scenario
+```mermaid
+sequenceDiagram
+
+    participant Alice
+    participant CV as Credential Verifier
+    participant PDP as ODRL Evaluator (PDP)
+    participant Policy as Policy Store
+    participant Service as Certificate Service
+
+    Alice->>CV: GET weighing certificate
+    Alice->>CV: Present affiliation VC
+    Alice->>CV: Present ServiceConsumer VC
+
+    CV->>CV: Verify VP signature
+    CV->>CV: Verify VC signatures
+    CV->>CV: Verify Van Moer may assign ServiceConsumer
+
+    CV->>PDP: Evaluation Request
+    CV->>PDP: State of the World
+    Note over CV,PDP: SotW contains purchaseCertificate event and payment information
+
+    Policy->>PDP: ODRL Policy
+    Policy->>PDP: SHACL Shapes
+
+    PDP->>PDP: Validate event against SHACL
+    PDP->>PDP: Evaluate role constraint
+    PDP->>PDP: Evaluate policy
+
+    PDP-->>CV: Permit
+
+    CV->>Service: Authorized request
+
+    Service->>Service: Transition state
+    Note over Service: certificateCreated → certificatePurchased
+
+    Service-->>Alice: Weighing certificate
+```
+
 ### Scenario 1: Establishing organisational identity
 
 In PILOTS, independent participants collaborate in a federated ecosystem.
