@@ -186,9 +186,10 @@ ex:request a sotw:EvaluationRequest ;
 State of the World
 ```ttl
 @prefix ex:      <http://example.com/> .
+@prefix dct:     <http://purl.org/dc/terms/>.
 @prefix sotw:    <https://w3id.org/force/sotw#> .
 @prefix pilots:  <https://pilots-project.be/ns#> .
-@prefix dct:     <http://purl.org/dc/terms/>.
+@prefix pay:     <https://reference.data.gov.uk/def/payment#> .
 @prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
 
 ex:sotw a sotw:SotW ;
@@ -202,21 +203,17 @@ ex:event a pilots:ServiceUpdate, pilots:purchaseCertificate ;
     pilots:paymentReference ex:payment ;
     dct:issued "2025-11-24T11:44:22"^^xsd:dateTime . # NOTE: must this match the time of the request time?
 
-ex:payment a pilots:Payment ;
-    pilots:payer <did:jwk:vanmoer> ;
-    pilots:payee <did:jwk:certiweight> ;
-    pilots:transactionId "paymentTransactionID" ;
-    pilots:paymentDate "2025-11-23T11:30:00"^^xsd:dateTime ; # NOTE: clearly before the request time
-    pilots:amount [
-        a pilots:MonetaryAmount ;
-        pilots:value "100.00"^^xsd:decimal ;
-        pilots:currency "EUR"
-    ] .
+ex:payment a pay:Payment ;
+    pay:payer <did:jwk:vanmoer> ;
+    pay:payee <did:jwk:certiweight> ;
+    pay:transactionId "paymentTransactionID" ;
+    pay:paymentDate "2025-11-23T11:30:00"^^xsd:dateTime ; # NOTE: clearly before the request time
+    pay:amount pay:netAmount "100.00"^^xsd:decimal ;
+    pay:currency "EUR" .
 ```
 
 > [!NOTE]
-> We could perhaps re-use the ontology of [good relations](https://www.heppnetz.de/ontologies/goodrelations/v1) to define the quantity and currency. Though unfortunately, we cannot use it for transactions.
-> The payment ontology proposed in the [force sotw](https://spec.knows.idlab.ugent.be/sotw/latest/#namespaces) does not resolve (https://reference.data.gov.uk/def/payment). Therefore, we make the payment pilots specific as well.
+> The payment ontology proposed in the [force sotw](https://spec.knows.idlab.ugent.be/sotw/latest/#namespaces) does not resolve (https://reference.data.gov.uk/def/payment). This has been documented in [issue 11](https://github.com/KNowledgeOnWebScale/sotw/issues/11) of the SOTW spec.
 
 > [!NOTE]
 > Another question, when checking whether it is payed. Is it for each time we want a certificate or only once? The semantics in ODRL are not well defined and therefore we cannot evaluate this properly. See [bonatti's paper](https://ceur-ws.org/Vol-3977/OPAL2025-4.pdf) (see remark 3: pay-per-view vs once and for all behaviour) Wout's ODRL journal on formal semantics where we detail we do not know this cardinality.
