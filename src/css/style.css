@@ -1,0 +1,94 @@
+.tabs {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.case-picker {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.case-picker label {
+    white-space: nowrap;
+    margin-bottom: var(--pico-spacing);
+}
+
+.highlight-info {
+    color: var(--pico-primary);
+    font-style: italic;
+}
+
+.stub-notice {
+    color: var(--pico-muted-color);
+}
+
+textarea {
+    font-family: var(--pico-font-family-monospace);
+    font-size: 0.8rem;
+}
+
+.result {
+    margin-top: var(--pico-spacing);
+}
+
+.verdict h4 {
+    margin-bottom: 0.25rem;
+}
+
+.verdict-yes {
+    border-left: 0.4rem solid var(--pico-form-element-valid-border-color);
+}
+
+.verdict-yes h4 {
+    color: var(--pico-form-element-valid-border-color);
+}
+
+.verdict-no {
+    border-left: 0.4rem solid var(--pico-form-element-invalid-border-color);
+}
+
+.verdict-no h4 {
+    color: var(--pico-form-element-invalid-border-color);
+}
+
+ul.checks {
+    padding-left: 0;
+}
+
+ul.checks ul.checks {
+    margin-top: 0.5rem;
+    padding-left: 1rem;
+}
+
+ul.checks li {
+    list-style: none;
+    display: flex;
+    gap: 0.6rem;
+}
+
+.check-icon {
+    font-weight: bold;
+}
+
+.check-pass .check-icon {
+    color: var(--pico-form-element-valid-border-color);
+}
+
+.check-fail .check-icon {
+    color: var(--pico-form-element-invalid-border-color);
+}
+
+.check-skip .check-icon {
+    color: var(--pico-muted-color);
+}
+
+#s3-report:empty {
+    display: none;
+}
+
+#s3-report {
+    padding: var(--pico-spacing);
+    font-size: 0.8rem;
+    white-space: pre-wrap;
+}

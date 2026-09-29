@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PILOTS Demonstrator</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Turtle parsing/serialisation for scenario 3 -->
+    <script src="https://cdn.jsdelivr.net/npm/n3@1.26.0/browser/n3.min.js"></script>
+
+    <script src="js/common.js"></script>
+    <!-- Stubs: replace these files with real implementations, keeping their APIs -->
+    <script src="js/credential-verifier-stub.js"></script>
+    <script src="js/shacl-validator-stub.js"></script>
+    <script src="js/odrl-evaluator-stub.js"></script>
+    <script src="js/compliance-report.js"></script>
+    <!-- Scenarios: standalone test cases and UI wiring -->
+    <script src="js/scenario1.js"></script>
+    <script src="js/scenario2.js"></script>
+    <script src="js/scenario3.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', () => Demo.initTabs());</script>
+</head>
+
+<body>
+    <header class="container">
+        <hgroup>
+            <h1>Automated process-based access control</h1>
+            <p>Dynamic roles with Verifiable Credentials, usage control with ODRL and input validation with SHACL in the
+                <a href="https://researchportal.vub.be/en/projects/icon-project-pilots-physical-internet-logistics-and-optimized-tra/">PILOTS</a>
+                certified container weighing process.</p>
+        </hgroup>
+        <p class="stub-notice">
+            <small>⚠ All verification and evaluation on this page is <strong>stubbed</strong>: signatures are fake hashes
+                and the ODRL Evaluator and SHACL validator are simplified. Each scenario stands on its own.</small>
+        </p>
+        <nav>
+            <ul class="tabs">
+                <li><a href="#scenario-1" role="button" data-tab="scenario-1">1. Organisational identity</a></li>
+                <li><a href="#scenario-2" role="button" data-tab="scenario-2">2. Process role</a></li>
+                <li><a href="#scenario-3" role="button" data-tab="scenario-3">3. Access evaluation</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <!-- ============================ Scenario 1 ============================ -->
+        <section data-panel="scenario-1" id="panel-scenario-1">
+            <h2>Scenario 1: Establishing organisational identity</h2>
+            <p>
+                Van Moer Logistics and CertiWeight issue affiliation credentials to their employees Alice and Bob.
+                An employee proves the affiliation by presenting the credential in a Verifiable Presentation (VP)
+                signed with the key of their own DID. The verifier checks both signatures, that the credential
+                subject signed the VP, and that the issuer is the organisation claimed. No central identity provider
+                is needed.
+            </p>
+
+            <div class="case-picker">
+                <label for="s1-case">Select a test case:</label>
+                <select id="s1-case"></select>
+            </div>
+            <p class="highlight-info" id="s1-info"></p>
+
+            <label for="s1-presentation">Verifiable Presentation</label>
+            <textarea id="s1-presentation" rows="22" spellcheck="false"></textarea>
+            <div class="grid">
+                <div>
+                    <label for="s1-dids">DID documents (stub DID resolver)</label>
+                    <textarea id="s1-dids" rows="12" spellcheck="false"></textarea>
+                </div>
+                <div>
+                    <label for="s1-orgs">Organisations known to the verifier</label>
+                    <textarea id="s1-orgs" rows="12" spellcheck="false"></textarea>
+                </div>
+            </div>
+            <button id="s1-verify">Verify presentation</button>
+            <div id="s1-result" class="result" aria-live="polite"></div>
+        </section>
+
+        <!-- ============================ Scenario 2 ============================ -->
+        <section data-panel="scenario-2" id="panel-scenario-2" hidden>
+            <h2>Scenario 2: Establishing the role within a process</h2>
+            <p>
+                A governance authority (the observer) defines which organisations may assign which process roles:
+                Van Moer Logistics may assign <code>dpv:ServiceConsumer</code>, CertiWeight may assign
+                <code>dpv:ServiceProvider</code>. An employee presents a role credential in a VP. On top of the
+                signature checks, the verifier checks that the governance framework authorises the issuer to assign
+                that role.
+            </p>
+
+            <div class="case-picker">
+                <label for="s2-case">Select a test case:</label>
+                <select id="s2-case"></select>
+            </div>
+            <p class="highlight-info" id="s2-info"></p>
+
+            <label for="s2-presentation">Verifiable Presentation</label>
+            <textarea id="s2-presentation" rows="22" spellcheck="false"></textarea>
+            <div class="grid">
+                <div>
+                    <label for="s2-dids">DID documents (stub DID resolver)</label>
+                    <textarea id="s2-dids" rows="12" spellcheck="false"></textarea>
+                </div>
+                <div>
+                    <label for="s2-governance">Governance framework</label>
+                    <textarea id="s2-governance" rows="12" spellcheck="false"></textarea>
+                </div>
+            </div>
+            <button id="s2-verify">Verify presentation</button>
+            <div id="s2-result" class="result" aria-live="polite"></div>
+        </section>
+
+        <!-- ============================ Scenario 3 ============================ -->
+        <section data-panel="scenario-3" id="panel-scenario-3" hidden>
+            <h2>Scenario 3: Evaluating an access request with input validation</h2>
+            <p>
+                Alice requests the certificate of a container's weight. The ODRL Evaluator combines an
+                <strong>Evaluation Request</strong> (who asks what, including her role), a
+                <strong>State of the World</strong> (the <code>purchaseCertificate</code> process event and payment)
+                and an <strong>ODRL Policy</strong>. The policy requires the <code>dpv:ServiceConsumer</code> role
+                and requires the event to conform to a SHACL shape from the policy store. The result is an
+                <a href="https://w3id.org/force/compliance-report">ODRL Compliance Report</a>.
+            </p>
+
+            <div class="case-picker">
+                <label for="s3-case">Select a test case:</label>
+                <select id="s3-case"></select>
+            </div>
+            <p class="highlight-info" id="s3-info"></p>
+
+            <div class="grid">
+                <div>
+                    <label for="s3-request">Evaluation Request</label>
+                    <textarea id="s3-request" rows="22" spellcheck="false"></textarea>
+                </div>
+                <div>
+                    <label for="s3-policy">ODRL Policy</label>
+                    <textarea id="s3-policy" rows="22" spellcheck="false"></textarea>
+                </div>
+            </div>
+            <div class="grid">
+                <div>
+                    <label for="s3-sotw">State of the World</label>
+                    <textarea id="s3-sotw" rows="22" spellcheck="false"></textarea>
+                </div>
+                <div>
+                    <label for="s3-shapes">SHACL shapes (policy store)</label>
+                    <textarea id="s3-shapes" rows="22" spellcheck="false"></textarea>
+                </div>
+            </div>
+            <button id="s3-evaluate">Evaluate</button>
+            <div id="s3-guidance" class="result" aria-live="polite"></div>
+            <h3>ODRL Compliance Report</h3>
+            <pre id="s3-report"></pre>
+        </section>
+    </main>
+
+    <footer class="container">
+        <hr>
+        <p><small>
+            The scenarios, architecture, trust and sequence diagrams are described in the
+            <a href="https://github.com/KNowledgeOnWebScale/pilots-demonstrator#readme">README</a>.
+            Builds on "Policy-based and Process-Aware Interoperability in the Physical Internet" (IPIC 2026) and the
+            <a href="https://w3id.org/force/demo">FORCE demo</a>.
+            <br>©2026 <a href="https://www.ugent.be/">Ghent University</a> – <a href="https://www.imec.be/">imec</a>, Belgium.
+        </small></p>
+    </footer>
+</body>
+
+</html>
