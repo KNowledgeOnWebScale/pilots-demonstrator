@@ -28,7 +28,7 @@ class PilotsODRLEvaluator {
     instantiation;
     normalisation;
     constructor(config = {}) {
-        const { reasoner = new odrl_evaluator_1.EyelingReasoner(), ODRLValidator, inputValidation = DEFAULTS.inputValidation, instantiation = DEFAULTS.instantiation, normalisation = DEFAULTS.normalisation, shapes = [], } = config;
+        const { reasoner = new odrl_evaluator_1.EyeJsReasoner(), ODRLValidator, inputValidation = DEFAULTS.inputValidation, instantiation = DEFAULTS.instantiation, normalisation = DEFAULTS.normalisation, shapes = [], } = config;
         this.odrlValidator = ODRLValidator;
         this.reasoner = reasoner;
         this.engine = new odrl_evaluator_1.ODRLEngineMultipleSteps({ reasoner, rules: Rules_1.RULES });

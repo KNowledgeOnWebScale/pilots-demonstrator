@@ -46,3 +46,5 @@ TODO list
 - [x] Describe how the comparison works
 - [ ] add to the demonstrator of scenario 3
 - [x] add tests about the pilots profile evaluator configuration
+- [ ] deploy as github actions
+- [ ] use shapes from evaluator rather than hardcoded (see scenario 3)

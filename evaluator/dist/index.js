@@ -14,9 +14,14 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.parseComplianceReport = exports.parseSingleComplianceReport = void 0;
 __exportStar(require("./PilotsEvaluator"), exports);
 __exportStar(require("./ShapeValidation"), exports);
 __exportStar(require("./Vocabularies"), exports);
 __exportStar(require("./rules/Rules"), exports);
 __exportStar(require("./shapes/Shapes"), exports);
+// compliance report parsing of the ODRL Evaluator (e.g. to interpret the reports of the PILOTS ODRL Evaluator)
+var odrl_evaluator_1 = require("odrl-evaluator");
+Object.defineProperty(exports, "parseSingleComplianceReport", { enumerable: true, get: function () { return odrl_evaluator_1.parseSingleComplianceReport; } });
+Object.defineProperty(exports, "parseComplianceReport", { enumerable: true, get: function () { return odrl_evaluator_1.parseComplianceReport; } });
 //# sourceMappingURL=index.js.map

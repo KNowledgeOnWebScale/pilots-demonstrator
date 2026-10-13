@@ -1,0 +1,20 @@
+{
+  "name": "pilots-demonstrator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Single page demonstrator of the PILOTS use case: automated process-based access control",
+  "scripts": {
+    "build": "npm run build --prefix evaluator && webpack",
+    "start": "npm run build --prefix evaluator && webpack serve"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "n3": "^1.26.0",
+    "pilots-odrl-evaluator": "file:./evaluator"
+  },
+  "devDependencies": {
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.0"
+  }
+}

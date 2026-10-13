@@ -8,19 +8,14 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
     <link rel="stylesheet" href="css/style.css">
 
-    <!-- Turtle parsing/serialisation for scenario 3 -->
-    <script src="https://cdn.jsdelivr.net/npm/n3@1.26.0/browser/n3.min.js"></script>
-
     <script src="js/common.js"></script>
     <!-- Stubs: replace these files with real implementations, keeping their APIs -->
     <script src="js/credential-verifier-stub.js"></script>
-    <script src="js/shacl-validator-stub.js"></script>
-    <script src="js/odrl-evaluator-stub.js"></script>
-    <script src="js/compliance-report.js"></script>
     <!-- Scenarios: standalone test cases and UI wiring -->
     <script src="js/scenario1.js"></script>
     <script src="js/scenario2.js"></script>
-    <script src="js/scenario3.js"></script>
+    <!-- scenario 3 uses the PILOTS ODRL Evaluator: bundled with webpack into dist/ (npm run build) -->
+    <script src="dist/scenario3.bundle.js"></script>
     <script>document.addEventListener('DOMContentLoaded', () => Demo.initTabs());</script>
 </head>
 
@@ -33,8 +28,8 @@
                 certified container weighing process.</p>
         </hgroup>
         <p class="stub-notice">
-            <small>⚠ All verification and evaluation on this page is <strong>stubbed</strong>: signatures are fake hashes
-                and the ODRL Evaluator and SHACL validator are simplified. Each scenario stands on its own.</small>
+            <small>⚠ Credential verification on this page is <strong>stubbed</strong>: signatures are fake hashes.
+                Scenario 3 runs the actual PILOTS ODRL Evaluator (with SHACL validation) in the browser. Each scenario stands on its own.</small>
         </p>
         <nav>
             <ul class="tabs">
