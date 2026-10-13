@@ -71,14 +71,28 @@ ex:pilotsPolicy a odrl:Set ; # odrl:Set because the policy does not identify an 
 
 ex:purchaseCertificatePermission a odrl:Permission ;
     odrl:target ex:containerWeight ;
-    odrl:assignee <did:jwk:vanmoer> ; # TODO: party collection with the role refinement (pilotsProfile:role, next iteration)
+#    odrl:assignee <did:jwk:vanmoer> ; # TODO: party collection with the role refinement (pilotsProfile:role, next iteration)
+    odrl:assignee [
+        a odrl:PartyCollection ;
+        odrl:refinement ex:roleConstraint
+    ] ;
     odrl:action odrl:read ;
-    odrl:constraint ex:eventConstraint .
+    odrl:constraint ex:eventConstraint, ex:purchaseCertificateConstraint .
 
 ex:eventConstraint a odrl:Constraint ;
     odrl:leftOperand pilotsProfile:shape ;
     odrl:operator odrl:eq ;
     odrl:rightOperand pilots:PilotsEventShape .
+ 
+ex:purchaseCertificateConstraint a odrl:Constraint ;
+    odrl:leftOperand pilotsProfile:shape ;
+    odrl:operator odrl:eq ;
+    odrl:rightOperand pilots:PurchaseCertificateShape .
+
+ex:roleConstraint a odrl:Constraint ;
+    odrl:leftOperand pilotsProfile:role ;
+    odrl:operator odrl:eq ;
+    odrl:rightOperand dpv:ServiceConsumer . # similar to pilots:serviceUser
 `;
 
 const STRICT_POLICY = POLICY.replace('pilots:PilotsEventShape', 'pilots:PurchaseCertificateShape');

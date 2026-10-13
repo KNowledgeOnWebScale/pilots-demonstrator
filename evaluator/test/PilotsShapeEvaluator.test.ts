@@ -1,6 +1,5 @@
-import { Parser, Quad } from 'n3';
-import { ActivationState, blanknodeify, parseComplianceReport, parseSingleComplianceReport } from 'odrl-evaluator';
-import { isomorphic } from 'rdf-isomorphic';
+import { Parser } from 'n3';
+import { ActivationState, parseSingleComplianceReport } from 'odrl-evaluator';
 import { describe, expect, it } from 'vitest';
 import { PilotsODRLEvaluator } from '../src/PilotsEvaluator';
 import { PILOT_SHAPES } from '../src/shapes/Shapes';
@@ -100,7 +99,7 @@ const emptySotw = `
 ex:sotw a sotw:SotW .
 `
 
-describe('The ShapeConstraintValidator', () => {
+describe('The PilotsODRLEvaluator ', () => {
     const parser = new Parser()
     const evaluator = new PilotsODRLEvaluator({shapes:parser.parse(PILOT_SHAPES)})
  

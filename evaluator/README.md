@@ -40,11 +40,3 @@ In that case, the validator adds a violation to the report with an explanatory m
 
 > [!NOTE]
 > EyeJsReasoner is currently employed to ensure it runs in the browser. In future versions, the configuration should be extended
-
-TODO list
-- [x] make shapes part of the package (so it can run natively in the browser)
-- [x] Describe how the comparison works
-- [ ] add to the demonstrator of scenario 3
-- [x] add tests about the pilots profile evaluator configuration
-- [ ] deploy as github actions
-- [ ] use shapes from evaluator rather than hardcoded (see scenario 3)

@@ -9,6 +9,16 @@ In [PILOTS-service-policies](https://github.com/KNowledgeOnWebScale/PILOTS-servi
 
 [Tom Bergmans](https://github.com/TomBergmans-Imec) created a [dashboard UI (stubbed)](https://github.com/Pilots-community/pilots-client-app) for the weighing use case in the [pilots-community](https://www.pilots.community/) [GitHub organization](https://github.com/Pilots-community).
 
+## Demo
+
+```sh
+npm install
+npm build        # builds this package and serves the page on http://localhost:8080
+npm http-server
+```
+
+go to http://localhost:8080/src and play with the live demo.
+The full explanation is in this README.md
 
 ## Open issues
 - we don't own the domain name: https://pilots-project.be/

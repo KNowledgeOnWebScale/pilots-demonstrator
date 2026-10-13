@@ -3,25 +3,40 @@ import { Parser } from 'n3'
 import { write } from '@jeswr/pretty-turtle';
 
 const policy = `
-@prefix ex:            <http://example.com/> .
-@prefix odrl:          <http://www.w3.org/ns/odrl/2/> .
-@prefix pilots:        <https://pilots-project.be/ns#> .
-@prefix pilotsProfile: <https://pilots-project.be/odrlProfile/> .
- 
-ex:policy a odrl:Set ;
-    odrl:permission [
-        odrl:target ex:containerWeight ;
-        odrl:action odrl:read ;
-        odrl:constraint ex:eventConstraint, ex:purchaseCertificateConstraint
-    ] .
- 
-ex:eventConstraint odrl:leftOperand pilotsProfile:shape ;
+@prefix ex:      <http://example.com/> .
+@prefix odrl:    <http://www.w3.org/ns/odrl/2/> .
+@prefix dpv:     <https://w3id.org/dpv#> .
+@prefix pilots:  <https://pilots-project.be/ns#> .
+@prefix pilotsProfile:  <https://pilots-project.be/odrlProfile/> .
+
+ex:pilotsPolicy a odrl:Set ; # odrl:Set because the policy does not identify an assigner
+    odrl:profile <https://pilots-project.be/odrlProfile/> ;
+    odrl:permission ex:purchaseCertificatePermission .
+
+ex:purchaseCertificatePermission a odrl:Permission ;
+    odrl:target ex:containerWeight ;
+    odrl:assignee [
+        a odrl:PartyCollection ;
+        odrl:refinement ex:roleConstraint
+    ] ;
+    odrl:action odrl:read ;
+    odrl:constraint ex:eventConstraint, ex:purchaseCertificateConstraint .
+
+ex:eventConstraint a odrl:Constraint ;
+    odrl:leftOperand pilotsProfile:shape ;
     odrl:operator odrl:eq ;
     odrl:rightOperand pilots:PilotsEventShape .
  
-ex:purchaseCertificateConstraint odrl:leftOperand pilotsProfile:shape ;
+ex:purchaseCertificateConstraint a odrl:Constraint ;
+    odrl:leftOperand pilotsProfile:shape ;
     odrl:operator odrl:eq ;
-    odrl:rightOperand pilots:PurchaseCertificateShape .`
+    odrl:rightOperand pilots:PurchaseCertificateShape .
+
+ex:roleConstraint a odrl:Constraint ;
+    odrl:leftOperand pilotsProfile:role ;
+    odrl:operator odrl:eq ;
+    odrl:rightOperand dpv:ServiceConsumer . # similar to pilots:serviceUser
+`
 
 const request = `
 @prefix ex:      <http://example.com/> .
