@@ -1,0 +1,21 @@
+export declare const RDF: import("rdf-vocabulary").Vocabulary<"http://www.w3.org/1999/02/22-rdf-syntax-ns#", "type">;
+export declare const RDFS: import("rdf-vocabulary").Vocabulary<"http://www.w3.org/2000/01/rdf-schema#", "Class">;
+export declare const XSD: import("rdf-vocabulary").Vocabulary<"http://www.w3.org/2001/XMLSchema#", "boolean">;
+export declare const SOTW: import("rdf-vocabulary").Vocabulary<"https://w3id.org/force/sotw#", "SotW">;
+export declare const REPORT: import("rdf-vocabulary").Vocabulary<"https://w3id.org/force/compliance-report#", "constraint" | "Active" | "Inactive" | "Satisfied" | "Unsatisfied" | "activationState" | "satisfactionState" | "constraintLeftOperand" | "constraintOperator" | "constraintRightOperand">;
+export declare const SH: import("rdf-vocabulary").Vocabulary<"http://www.w3.org/ns/shacl#", "ValidationReport" | "ValidationResult" | "conforms" | "result" | "focusNode" | "resultMessage" | "resultSeverity" | "sourceShape" | "sourceConstraintComponent" | "Violation" | "MinCountConstraintComponent" | "targetClass" | "targetNode" | "targetSubjectsOf" | "targetObjectsOf">;
+export declare const PILOTS_PROFILE: import("rdf-vocabulary").Vocabulary<"https://pilots-project.be/odrlProfile/", "shape" | "role" | "shaclReport" | "FocusNodeExistenceConstraintComponent" | "ShapeExistenceConstraintComponent">;
+export declare const prefixes: {
+    pilots: string;
+    pilotsProfile: string;
+    sh: string;
+    cr: string;
+    dct: string;
+    ex: string;
+    foaf: string;
+    odrl: string;
+    schema: string;
+    xsd: string;
+    dpv: string;
+    sotw: string;
+};

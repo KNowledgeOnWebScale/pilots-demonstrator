@@ -1,0 +1,41 @@
+@prefix : <http://example.org/> .
+@prefix odrl: <http://www.w3.org/ns/odrl/2/> .
+@prefix report: <https://w3id.org/force/compliance-report#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix pilotsProfile: <https://pilots-project.be/odrlProfile/> .
+
+#######################################################################################################################
+# ODRL PILOTS profile: left operand pilotsProfile:shape
+#
+# Added to the first reasoning step of the ODRL Evaluator rules.
+# Input: one sh:ValidationReport per shape, linked to that shape with :validatedShape (see src/ShapeValidation.ts).
+#
+# These rules only resolve the left operand value, as is done for the ODRL left operands (constraints.n3):
+# the value is the shape when the State of the World conforms to it, and "" (no value) otherwise.
+# The operator rules of the ODRL Evaluator then decide the satisfaction state (e.g. odrl:eq with the shape as right operand).
+
+# Left operand value: the shape, when the State of the World conforms to it
+{
+    ?premiseReport report:constraint ?constraint .
+    ?constraint odrl:leftOperand pilotsProfile:shape ;
+        odrl:rightOperand ?shape .
+
+    ?validationReport :validatedShape ?shape ;
+        sh:conforms true .
+} => {
+    ?premiseReport pilotsProfile:shaclReport ?validationReport .
+    ?premiseReport report:constraintLeftOperand ?shape .
+} .
+
+# Left operand value: none, when the State of the World does not conform to the shape
+{
+    ?premiseReport report:constraint ?constraint .
+    ?constraint odrl:leftOperand pilotsProfile:shape ;
+        odrl:rightOperand ?shape .
+
+    ?validationReport :validatedShape ?shape ;
+        sh:conforms false .
+} => {
+    ?premiseReport pilotsProfile:shaclReport ?validationReport .
+    ?premiseReport report:constraintLeftOperand "" .
+} .
