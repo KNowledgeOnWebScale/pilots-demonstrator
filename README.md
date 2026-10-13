@@ -7,10 +7,22 @@ by Philippe Michiels, Julián Rojas and Birger Schrevens
 
 In [PILOTS-service-policies](https://github.com/KNowledgeOnWebScale/PILOTS-service-policies), there exist some more example policies made by [Julián Rojas](https://github.com/julianrojas87).
 
-[Tom Bergmans](https://github.com/TomBergmans-Imec) created a [dashboard UI (stubbed)](https://github.com/Pilots-community/pilots-client-app) for the weighing use case in the [pilots-community](https://github.com/Pilots-community) GitHub organization.
+[Tom Bergmans](https://github.com/TomBergmans-Imec) created a [dashboard UI (stubbed)](https://github.com/Pilots-community/pilots-client-app) for the weighing use case in the [pilots-community](https://www.pilots.community/) [GitHub organization](https://github.com/Pilots-community).
+
+## Demo
+
+```sh
+npm install
+npm build        # builds this package and serves the page on http://localhost:8080
+npm http-server
+```
+
+go to http://localhost:8080/src and play with the live demo.
+The full explanation is in this README.md
 
 ## Open issues
 - we don't own the domain name: https://pilots-project.be/
+  - but https://www.pilots.community/ exists though -> @Julian, use this one instead?
 - What is scenario 2 exactly again
 - The SHACL shape only checks the general pilots service update shape. Not whether the states actually are correct (which we could do if that is required)
 
@@ -378,7 +390,7 @@ ex:request a sotw:EvaluationRequest ;
     ], [
         a sotw:RequestParameter ;
         sotw:value dpv:ServiceConsumer ; # similar to pilots:serviceUser
-        sotw:describesFeature pilots:actorRole . # defined in the IPIC paper
+        sotw:describesFeature pilots:actorRole ; # defined in the IPIC paper
     ] .
 
 <did:jwk:vanmoer> a odrl:PartyCollection .
@@ -415,7 +427,7 @@ ex:payment a pay:Payment ;
     pay:payee <did:jwk:certiweight> ;
     pay:transactionId "paymentTransactionID" ;
     pay:paymentDate "2025-11-23T11:30:00"^^xsd:dateTime ; # NOTE: clearly before the request time
-    pay:amount pay:netAmount "100.00"^^xsd:decimal ;
+    pay:netAmount "100.00"^^xsd:decimal ;
     pay:currency "EUR" .
 ```
 
@@ -591,8 +603,10 @@ pilots:PurchaseCertificateShape
 @prefix pilotsProfile:  <https://pilots-project.be/odrlProfile/> .
 @prefix profile: <http://www.w3.org/ns/dx/prof/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix report: <https://w3id.org/force/compliance-report#>.
 @prefix skos: <http://www.w3.org/2004/02/skos/core#>.
 @prefix sw: <http://www.w3.org/2003/06/sw-vocab-status/ns#>.
+@prefix sh:      <http://www.w3.org/ns/shacl#> .
 @prefix vann: <http://purl.org/vocab/vann/>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 
@@ -685,4 +699,41 @@ pilotsProfile:role a odrl:LeftOperand, owl:NamedIndividual, skos:Concept ;
         odrl:operator odrl:eq ;
         odrl:rightOperand dpv:ServiceProvider .
     ''' .
+
+
+# ------------ Compliance Report extension ------------------ #
+
+pilotsProfile:shaclReport a owl:ObjectProperty, skos:Concept ;
+    rdfs:isDefinedBy pilotsProfile: ;
+    rdfs:label "SHACL report"@en ;
+    rdfs:comment "Links a constraint report to the SHACL validation report that decided its satisfaction state."@en ;
+    skos:definition "Relates a report:ConstraintReport of a constraint with left operand pilotsProfile:shape to the sh:ValidationReport resulting from validating the State of the World against the shape of that constraint (its right operand). The constraint report is report:Satisfied iff the validation report has sh:conforms true."@en ;
+    rdfs:domain report:ConstraintReport ;
+    rdfs:range sh:ValidationReport ;
+    skos:example '''
+        <urn:uuid:constraintReport> a report:ConstraintReport ;
+            report:constraint <https://example.com/shapeConstraint1> ;
+            report:constraintLeftOperand <https://example.com/shape> ;
+            report:constraintOperator odrl:eq ;
+            report:constraintRightOperand <https://example.com/shape> ;
+            report:satisfactionState report:Unsatisfied ;
+            pilotsProfile:shaclReport <urn:uuid:validationReport> .
+
+        <urn:uuid:validationReport> a sh:ValidationReport ;
+            sh:conforms false ;
+            sh:result [ a sh:ValidationResult ; sh:resultMessage "..." ] .
+    ''' .
+
+# Constraint components for the checks the ODRL Evaluator does on top of plain SHACL validation.
+# They appear as sh:sourceConstraintComponent of a sh:ValidationResult in the report referenced by pilotsProfile:shaclReport.
+
+pilotsProfile:FocusNodeExistenceConstraintComponent a sh:ConstraintComponent ;
+    rdfs:isDefinedBy pilotsProfile: ;
+    rdfs:label "Focus node existence constraint component"@en ;
+    rdfs:comment "Reported when the State of the World contains no focus node for the shape of a pilotsProfile:shape constraint. The sh:focusNode of the result is the State of the World."@en .
+
+pilotsProfile:ShapeExistenceConstraintComponent a sh:ConstraintComponent ;
+    rdfs:isDefinedBy pilotsProfile: ;
+    rdfs:label "Shape existence constraint component"@en ;
+    rdfs:comment "Reported when the shape of a pilotsProfile:shape constraint is not present in the shapes graph given to the ODRL Evaluator. The sh:focusNode of the result is the State of the World."@en .
 ```

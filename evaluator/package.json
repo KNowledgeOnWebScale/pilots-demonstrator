@@ -1,0 +1,36 @@
+{
+  "name": "pilots-odrl-evaluator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ODRL Evaluator for the PILOTS demonstrator: extends the ODRL Evaluator with SHACL input validation of the State of the World (pilotsProfile:shape)",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "npm run clean && npm run makeRules && npm run makeShapes && tsc",
+    "makeRules": "ts-node scripts/MakeRules.ts",
+    "makeShapes": "ts-node scripts/MakeShapes.ts ",
+    "clean": "rm -rf ./dist",
+    "demo": "ts-node demo/scenario3.ts",
+    "test": "vitest run"
+  },
+  "author": "Wout Slabbinck",
+  "license": "MIT",
+  "dependencies": {
+    "@rdfjs/types": "^1.1.0",
+    "n3": "^1.20.4",
+    "odrl-evaluator": "github:SolidLabResearch/ODRL-Evaluator#e23650a98d0b8688196cce0dd0c116d58a7ce465",
+    "shacl-engine": "^1.1.2"
+  },
+  "devDependencies": {
+    "@jeswr/pretty-turtle": "^1.8.2",
+    "@types/n3": "^1.16.3",
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5",
+    "tsx": "^4.23.15",
+    "vitest": "^3.2.7"
+  }
+}
