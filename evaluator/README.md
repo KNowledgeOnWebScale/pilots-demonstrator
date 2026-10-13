@@ -12,7 +12,9 @@ npx tsx demo/demo.ts
 
 ## How does it work?
 
-Two things are added to the evaluator to make it work:
+### Shape input validation during evaluation
+
+Two things are added to the evaluator to make shape validation work:
 1. a Shape Constraint Validator
 2. Two Notation3 rules for the left operand `pilotsProfile:shape`
 
@@ -40,3 +42,9 @@ In that case, the validator adds a violation to the report with an explanatory m
 
 > [!NOTE]
 > EyeJsReasoner is currently employed to ensure it runs in the browser. In future versions, the configuration should be extended
+
+### Refinement evaluation
+
+Three Notation3 Rules are added.
+
+See the rules for more info, it is self explanatory.
