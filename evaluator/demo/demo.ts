@@ -1,7 +1,5 @@
 import { PilotsODRLEvaluator, prefixes, PILOT_SHAPES } from '../src'
 import { Parser } from 'n3'
-import * as fs from 'fs';
-import * as path from 'path';
 import { write } from '@jeswr/pretty-turtle';
 
 const policy = `
@@ -78,8 +76,6 @@ ex:payment a pay:Payment ;
     pay:netAmount "100.00"^^xsd:decimal ;
     pay:currency "EUR" .
 `
-
-
 
 async function main(){
     const parser = new Parser()

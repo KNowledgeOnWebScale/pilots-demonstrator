@@ -1,5 +1,6 @@
 # Pilots Evaluator
 
+## Run it
 See demo to play around with it
 
 ```ts
@@ -9,8 +10,7 @@ npm run build
 npx tsx demo/demo.ts
 ```
 
-
-How does it work?
+## How does it work?
 
 Two things are added to the evaluator to make it work:
 1. a Shape Constraint Validator
@@ -38,8 +38,11 @@ Special care is taken when the State of the World contains nothing the shape app
 A SHACL engine then reports conformance, as there is nothing to validate, which is not what we intend.
 In that case, the validator adds a violation to the report with an explanatory message. The same happens when the shape is not present in the shapes graph.
 
+> [!NOTE]
+> EyeJsReasoner is currently employed to ensure it runs in the browser. In future versions, the configuration should be extended
 
 TODO list
-- make shapes part of the package (so it can run natively in the browser)
-- [ ] Describe how the comparison works
-- add to the demonstrator of scenario 3
+- [x] make shapes part of the package (so it can run natively in the browser)
+- [x] Describe how the comparison works
+- [ ] add to the demonstrator of scenario 3
+- [x] add tests about the pilots profile evaluator configuration

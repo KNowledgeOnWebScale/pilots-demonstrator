@@ -1,4 +1,4 @@
-import { Parser, Quad, Writer } from 'n3';
+import { Parser, Quad } from 'n3';
 import { blanknodeify } from 'odrl-evaluator';
 import { isomorphic } from 'rdf-isomorphic';
 import { describe, expect, it } from 'vitest';

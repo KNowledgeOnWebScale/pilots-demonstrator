@@ -1,6 +1,6 @@
 import type { Quad } from '@rdfjs/types';
 import {
-    Engine, Evaluator, EvaluatorInput, EyelingReasoner, materializePolicy, mergeDerivedRuleReports,
+    Engine, Evaluator, EvaluatorInput, EyeJsReasoner, materializePolicy, mergeDerivedRuleReports,
     ODRLEngineMultipleSteps, Reasoner, validateInput, Validator,
 } from 'odrl-evaluator';
 import { Normalizer } from 'odrl-validator/dist/Normalisation';
@@ -43,7 +43,7 @@ export class PilotsODRLEvaluator implements Evaluator {
 
     constructor(config: PilotsEvaluatorInput = {}) {
         const {
-            reasoner = new EyelingReasoner(),
+            reasoner = new EyeJsReasoner(),
             ODRLValidator,
             inputValidation = DEFAULTS.inputValidation,
             instantiation = DEFAULTS.instantiation,
